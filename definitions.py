@@ -37,6 +37,7 @@ def createDefinitionFile(word, definition, path = None):
         filename = word + ".txt"
     with open(filename, "w") as f:
         f.write(definition)
+    return
 
-# word = getDefinition("hello")
-# createDefinitionFile("hello", word)
+word = getDefinition("hello")
+createDefinitionFile("hello", word)
