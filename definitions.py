@@ -1,14 +1,24 @@
 from bs4 import BeautifulSoup
 import requests
+import time
 
 # code citation for web scapers: https://arguswaikhom.medium.com/web-scraping-word-meaning-with-beautifulsoup-99308ead148a
 # code citation for web scraper: https://www.byteacademy.co/blog/build-keyword-dictionary-python
 
-
 # takes as a string the word to define, searches oxford dictionary and pulls the top definition
 # for that word, returning the text definition. Error checking can be handled
 # checking if this function returned false.
-def getDefinition(wordToDefine):
+def getDefinition():
+    while True:
+        time.sleep(1.0)
+        file = open("watchMe.txt", "r")
+        data = file.readline()
+        file.close()
+        if data is None or data == '':
+            continue
+        else:
+            break
+    wordToDefine = data
     scrape = "https://www.oxfordlearnersdictionaries.com/definition/english/" + wordToDefine
     headers = {"User-Agent": ""}
     response = requests.get(scrape, headers=headers)
@@ -22,7 +32,7 @@ def getDefinition(wordToDefine):
     if definedWord is None:  # error checking
         return False
     else:
-        return definedWord
+        return createDefinitionFile(wordToDefine, definedWord)
 
 # Takes as strings the word that was defined in getDefinition, the returned value from
 # getDefinition, and an optional argument of a path name, then creates a
@@ -39,5 +49,4 @@ def createDefinitionFile(word, definition, path = None):
         f.write(definition)
     return
 
-word = getDefinition("hello")
-createDefinitionFile("hello", word)
+getDefinition()
