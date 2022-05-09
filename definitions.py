@@ -5,34 +5,36 @@ import time
 # code citation for web scapers: https://arguswaikhom.medium.com/web-scraping-word-meaning-with-beautifulsoup-99308ead148a
 # code citation for web scraper: https://www.byteacademy.co/blog/build-keyword-dictionary-python
 
-# takes as a string the word to define, searches oxford dictionary and pulls the top definition
-# for that word, returning the text definition. Error checking can be handled
-# checking if this function returned false.
+# Loops continously while checking watchMe.txt to see if a word is input. If a
+# word is input, it then calls createDefinitionFile and goes back to sleep
+# waiting for the next word
 def getDefinition():
     while True:
-        time.sleep(1.0)
-        file = open("watchMe.txt", "r")
-        data = file.readline()
-        file.close()
-        if data is None or data == '':
+        while True:
+            time.sleep(1.0)
+            file = open("watchMe.txt", "r")
+            data = file.readline().strip()
+            file.close()
+            if data is None or data == '':
+                continue
+            else:
+                break
+        wordToDefine = data
+        scrape = "https://www.oxfordlearnersdictionaries.com/definition/english/" + wordToDefine
+        headers = {"User-Agent": ""}
+        response = requests.get(scrape, headers=headers)
+        definedWord = None
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            result = soup.find_all('li', class_='sense')
+            for x in result:
+                definedWord = x.find('span', class_='def').text
+                break  # stop at the first returned definition
+        if definedWord is None or definedWord == '':  # error checking
             continue
         else:
-            break
-    wordToDefine = data
-    scrape = "https://www.oxfordlearnersdictionaries.com/definition/english/" + wordToDefine
-    headers = {"User-Agent": ""}
-    response = requests.get(scrape, headers=headers)
-    definedWord = None
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        result = soup.find_all('li', class_='sense')
-        for x in result:
-            definedWord = x.find('span', class_='def').text
-            break  # stop at the first returned definition
-    if definedWord is None:  # error checking
-        return False
-    else:
-        return createDefinitionFile(wordToDefine, definedWord)
+            createDefinitionFile(wordToDefine, definedWord)
+
 
 # Takes as strings the word that was defined in getDefinition, the returned value from
 # getDefinition, and an optional argument of a path name, then creates a
